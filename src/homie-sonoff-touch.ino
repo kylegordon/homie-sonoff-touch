@@ -2,21 +2,29 @@
 
 #include <Homie.h>
 
+#define FW_NAME "homie-sonoff-touch"
+#define FW_VERSION "0.0.3"
+
+/* Magic sequence for Autodetectable Binary Upload */
+const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
+const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x48\xd4\x1a";
+/* End of magic sequence for Autodetectable Binary Upload */
+
 const int PIN_RELAY = 12;
 const int PIN_LED = 13;
 const int PIN_BUTTON = 0;
 
-HomieNode switchNode("switch", "switch");
+HomieNode relayNode("relay", "relay");
 
-bool switchOnHandler(String value) {
+bool RelayHandler(String value) {
   if (value == "true") {
     digitalWrite(PIN_RELAY, HIGH);
-    Homie.setNodeProperty(switchNode, "on", "true");
-    Serial.println("Switch is on");
+    Homie.setNodeProperty(relayNode, "on", "true");
+    Serial.println("Relay is on");
   } else if (value == "false") {
     digitalWrite(PIN_RELAY, LOW);
-    Homie.setNodeProperty(switchNode, "on", "false");
-    Serial.println("Switch is off");
+    Homie.setNodeProperty(relayNode, "on", "false");
+    Serial.println("Relay is off");
   } else {
     return false;
   }
@@ -24,15 +32,24 @@ bool switchOnHandler(String value) {
   return true;
 }
 
+
+void loopHandler() {
+  digitalWrite(PIN_RELAY, HIGH);
+}
+
 void setup() {
   pinMode(PIN_RELAY, OUTPUT);
   digitalWrite(PIN_RELAY, LOW);
 
-  Homie.setFirmware("itead-sonoff", "1.0.0");
-  Homie.setLedPin(PIN_LED, LOW);
+  Serial.println("Enabling touch switch interrupt");
+  //attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), buttonChangeCallback, CHANGE);
+
+  Homie.setFirmware(FW_NAME, FW_VERSION);
+  Homie.setLedPin(PIN_LED, HIGH); // Status LED
   Homie.setResetTrigger(PIN_BUTTON, LOW, 5000);
-  switchNode.subscribe("on", switchOnHandler);
-  Homie.registerNode(switchNode);
+  Homie.setLoopFunction(loopHandler);
+  relayNode.subscribe("on", RelayHandler);
+  Homie.registerNode(relayNode);
   Homie.setup();
 }
 
