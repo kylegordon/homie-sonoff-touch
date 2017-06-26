@@ -1,5 +1,15 @@
 /* WARNING: untested */
 
+/* Some functional ideas
+  Single, double and triple tap.
+  Single and double tap and hold
+  Single tap = regular on/off
+  Single hold = dim up
+  Double tap = Unknown
+  Double tap and hold = dim down
+  Triple tap = toggle state of onboard relay
+*/
+
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
@@ -19,8 +29,15 @@ const int PIN_RELAY = 12;
 const int PIN_LED = 13;
 const int PIN_BUTTON = 0;
 
-Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
+volatile unsigned long timestamp = 0;
+volatile unsigned long singletimer = 0;
+volatile unsigned long doubletimer = 0;
+volatile unsigned long tripletimer = 0;
+
+
 int lastbuttonState = -1;
+
+Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
 
 HomieNode relayNode("relay", "relay");
 HomieNode buttonNode("button", "button");
@@ -43,13 +60,19 @@ bool RelayHandler(String value) {
 }
 
 void loopHandler() {
+  // Ideally this would be handled by an interrupt, but it seems to make Homie hang.
   int buttonState = debouncer.read();
 
   if (buttonState != lastbuttonState) {
-     Serial.print("Button is now: ");
-     Serial.println(buttonState ? "open" : "close");
+     timestamp = millis();
+     singletimer = timestamp;
+     doubletimer = timestamp;
+     tripletimer = timestamp;
 
-     if (Homie.setNodeProperty(buttonNode, "open", buttonState ? "true" : "false", true)) {
+     Serial.print("Button is now: ");
+     Serial.println(buttonState ? "pressed" : "released");
+
+     if (Homie.setNodeProperty(buttonNode, "state", buttonState ? "pressed" : "released", true)) {
        lastbuttonState = buttonState;
      } else {
        Serial.println("Sending failed");
