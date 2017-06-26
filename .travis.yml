@@ -17,7 +17,7 @@ env:
 
 install:
     - pip install -U platformio
-    - platformio lib install -g 252 555
+    - platformio lib -g install 252 555
 
 script:
     - platformio ci --board=esp8285
