@@ -70,9 +70,9 @@ void loopHandler() {
      tripletimer = timestamp;
 
      Serial.print("Button is now: ");
-     Serial.println(buttonState ? "pressed" : "released");
+     Serial.println(buttonState ? "released" : "pressed");
 
-     if (Homie.setNodeProperty(buttonNode, "state", buttonState ? "pressed" : "released", true)) {
+     if (Homie.setNodeProperty(buttonNode, "state", buttonState ? "released" : "pressed", true)) {
        lastbuttonState = buttonState;
      } else {
        Serial.println("Sending failed");
