@@ -3,7 +3,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "0.0.5alpha"
+#define FW_VERSION "0.0.5"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -19,7 +19,11 @@ const int PIN_RELAY = 12;
 const int PIN_LED = 13;
 const int PIN_BUTTON = 0;
 
+Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
+int lastbuttonState = -1;
+
 HomieNode relayNode("relay", "relay");
+HomieNode buttonNode("button", "button");
 
 bool RelayHandler(String value) {
   if (value == "ON") {
@@ -38,17 +42,29 @@ bool RelayHandler(String value) {
   return true;
 }
 
-
 void loopHandler() {
-  //digitalWrite(PIN_RELAY, HIGH);
+  int buttonState = debouncer.read();
+
+  if (buttonState != lastbuttonState) {
+     Serial.print("Button is now: ");
+     Serial.println(buttonState ? "open" : "close");
+
+     if (Homie.setNodeProperty(buttonNode, "open", buttonState ? "true" : "false", true)) {
+       lastbuttonState = buttonState;
+     } else {
+       Serial.println("Sending failed");
+     }
+  }
 }
 
 void setup() {
   pinMode(PIN_RELAY, OUTPUT);
   digitalWrite(PIN_RELAY, LOW);
 
-  Serial.println("Enabling touch switch interrupt");
-  //attachInterrupt(digitalPinToInterrupt(PIN_BUTTON), buttonChangeCallback, CHANGE);
+  pinMode(PIN_BUTTON, INPUT);
+  digitalWrite(PIN_BUTTON, HIGH);
+  debouncer.attach(PIN_BUTTON);
+  debouncer.interval(50);
 
   Homie.setFirmware(FW_NAME, FW_VERSION);
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
@@ -56,9 +72,11 @@ void setup() {
   Homie.setLoopFunction(loopHandler);
   relayNode.subscribe("relayState", RelayHandler);
   Homie.registerNode(relayNode);
+  Homie.registerNode(buttonNode);
   Homie.setup();
 }
 
 void loop() {
   Homie.loop();
+  debouncer.update();
 }
