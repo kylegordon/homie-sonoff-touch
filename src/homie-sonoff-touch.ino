@@ -10,10 +10,11 @@
   Triple tap = toggle state of onboard relay
 */
 
+#include <ClickButton.h>
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "0.0.5"
+#define FW_VERSION "0.0.6"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -25,17 +26,21 @@ const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x
 // Scheme is similar to https://github.com/enc-X/sonoff-homie
 // ie, mosquitto_pub -h homeauto.vpn.glasgownet.com -t 'devices/85376d51/relay/relayState/set' -m 'ON'
 
+// Nr. of buttons in the array
+const int buttons = 1;
+
 const int PIN_RELAY = 12;
 const int PIN_LED = 13;
 const int PIN_BUTTON = 0;
 
+volatile bool published = false;
 volatile unsigned long timestamp = 0;
-volatile unsigned long singletimer = 0;
-volatile unsigned long doubletimer = 0;
-volatile unsigned long tripletimer = 0;
 
+ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
 int lastbuttonState = -1;
+int ledState = 0;
+int LEDfunction = 0;
 
 Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
 
@@ -59,24 +64,47 @@ bool RelayHandler(String value) {
   return true;
 }
 
+void shortPress() {
+  Serial.println("Short press");
+  published = true;
+}
+
+void longPress() {
+  Serial.println("Long press");
+  published = true;
+}
+
 void loopHandler() {
-  // Ideally this would be handled by an interrupt, but it seems to make Homie hang.
-  int buttonState = debouncer.read();
+  // Update button state
+  button1.Update();
 
-  if (buttonState != lastbuttonState) {
-     timestamp = millis();
-     singletimer = timestamp;
-     doubletimer = timestamp;
-     tripletimer = timestamp;
+  // Save click codes in LEDfunction, as click codes are reset at next Update()
+  if (button1.clicks != 0) LEDfunction = button1.clicks;
 
-     Serial.print("Button is now: ");
-     Serial.println(buttonState ? "released" : "pressed");
 
-     if (Homie.setNodeProperty(buttonNode, "state", buttonState ? "released" : "pressed", true)) {
-       lastbuttonState = buttonState;
-     } else {
-       Serial.println("Sending failed");
-     }
+  // Simply toggle LED on single clicks
+  // (Cant use LEDfunction like the others here,
+  //  as it would toggle on and off all the time)
+  if(button1.clicks == 1) ledState = !ledState;
+
+  // blink faster if double clicked
+  if(LEDfunction == 2) ledState = (millis()/500)%2;
+
+  // blink even faster if triple clicked
+  if(LEDfunction == 3) ledState = (millis()/200)%2;
+
+  // slow blink (must hold down button. 1 second long blinks)
+  if(LEDfunction == -1) ledState = (millis()/1000)%2;
+
+  // slower blink (must hold down button. 2 second loong blinks)
+  if(LEDfunction == -2) ledState = (millis()/2000)%2;
+
+  // even slower blink (must hold down button. 3 second looong blinks)
+  if(LEDfunction == -3) ledState = (millis()/3000)%2;
+
+  if ( !published ) {
+    Serial.println(LEDfunction);
+    published = true;
   }
 }
 
@@ -84,10 +112,11 @@ void setup() {
   pinMode(PIN_RELAY, OUTPUT);
   digitalWrite(PIN_RELAY, LOW);
 
-  pinMode(PIN_BUTTON, INPUT);
-  digitalWrite(PIN_BUTTON, HIGH);
-  debouncer.attach(PIN_BUTTON);
-  debouncer.interval(50);
+  // Setup button timers (all in milliseconds / ms)
+  // (These are default if not set, but changeable for convenience)
+  button1.debounceTime   = 20;   // Debounce timer in ms
+  button1.multiclickTime = 250;  // Time limit for multi clicks
+  button1.longClickTime  = 1000; // time until "held-down clicks" register
 
   Homie.setFirmware(FW_NAME, FW_VERSION);
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
@@ -102,5 +131,4 @@ void setup() {
 
 void loop() {
   Homie.loop();
-  debouncer.update();
 }

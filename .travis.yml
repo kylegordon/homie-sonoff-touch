@@ -17,7 +17,7 @@ env:
 
 install:
     - pip install -U platformio
-    - platformio lib -g install Homie ArduinoJSON@5.10.0
+    - platformio lib -g install clickButton Homie ArduinoJSON@5.10.0
     - rm -vrf '~/.platformio/lib/ArduinoJSON@5.11.0'
 
 script:
