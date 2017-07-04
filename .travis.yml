@@ -17,8 +17,10 @@ env:
 
 install:
     - pip install -U platformio
-    - platformio lib -g install clickButton Homie ArduinoJSON@5.10.0
-    - rm -vrf '~/.platformio/lib/ArduinoJSON@5.11.0'
+    - platformio lib -g install clickButton Homie
+    - sed -i s/'DynamicJsonBuffer generatedJsonBuffer = DynamicJsonBuffer'/'DynamicJsonBuffer generatedJsonBuffer'/ ~/.platformio/lib/Homie_ID555/src/Homie/Boot/BootConfig.cpp
+    - sed -i s/'DynamicJsonBuffer jsonBuffer = DynamicJsonBuffer'/'DynamicJsonBuffer jsonBuffer'/ ~/.platformio/lib/Homie_ID555/src/Homie/Boot/BootConfig.cpp
+
 
 script:
     - platformio ci --board=esp8285
