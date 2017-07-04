@@ -14,7 +14,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "0.0.7"
+#define FW_VERSION "0.0.8"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -97,14 +97,18 @@ void loopHandler() {
 
   if ( function > 0 ) {
     // One shot message
-    Serial.println("Resetting");
+    Serial.println("One-shot");
     function = 0;
   }
 
   if ( function < 0 ) {
-    // Repeat messages until released.
-    // Will likely need to rate limit repeat message publishing
-    Serial.println("Held");
+    if ( button1.depressed == 1 ) {
+      Serial.println("Held");
+    }
+    if ( button1.depressed == 0 ) {
+      Serial.println("Released");
+      function = 0;
+    }
   }
 
   delay(5);
