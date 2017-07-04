@@ -14,7 +14,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "0.0.6"
+#define FW_VERSION "0.0.7"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -41,6 +41,8 @@ ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 int lastbuttonState = -1;
 int ledState = 0;
 int LEDfunction = 0;
+int function = 0;
+int lastmillis = millis();
 
 Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
 
@@ -78,34 +80,35 @@ void loopHandler() {
   // Update button state
   button1.Update();
 
-  // Save click codes in LEDfunction, as click codes are reset at next Update()
-  if (button1.clicks != 0) LEDfunction = button1.clicks;
+  // Save click codes in function, as click codes are reset at next Update()
+  if(button1.clicks != 0) function = button1.clicks;
 
+  if(function == 1) Serial.println("SINGLE click");
 
-  // Simply toggle LED on single clicks
-  // (Cant use LEDfunction like the others here,
-  //  as it would toggle on and off all the time)
-  if(button1.clicks == 1) ledState = !ledState;
+  if(function == 2) Serial.println("DOUBLE click");
 
-  // blink faster if double clicked
-  if(LEDfunction == 2) ledState = (millis()/500)%2;
+  if(function == 3) Serial.println("TRIPLE click");
 
-  // blink even faster if triple clicked
-  if(LEDfunction == 3) ledState = (millis()/200)%2;
+  if(function == -1) Serial.println("SINGLE LONG click");
 
-  // slow blink (must hold down button. 1 second long blinks)
-  if(LEDfunction == -1) ledState = (millis()/1000)%2;
+  if(function == -2) Serial.println("DOUBLE LONG click");
 
-  // slower blink (must hold down button. 2 second loong blinks)
-  if(LEDfunction == -2) ledState = (millis()/2000)%2;
+  if(function == -3) Serial.println("TRIPLE LONG click");
 
-  // even slower blink (must hold down button. 3 second looong blinks)
-  if(LEDfunction == -3) ledState = (millis()/3000)%2;
-
-  if ( !published ) {
-    Serial.println(LEDfunction);
-    published = true;
+  if ( function > 0 ) {
+    // One shot message
+    Serial.println("Resetting");
+    function = 0;
   }
+
+  if ( function < 0 ) {
+    // Repeat messages until released.
+    // Will likely need to rate limit repeat message publishing
+    Serial.println("Held");
+  }
+
+  delay(5);
+
 }
 
 void setup() {
