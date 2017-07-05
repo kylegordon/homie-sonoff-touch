@@ -83,18 +83,40 @@ void loopHandler() {
   // Save click codes in function, as click codes are reset at next Update()
   if(button1.clicks != 0) function = button1.clicks;
 
-  if(function == 1) Serial.println("SINGLE click");
 
-  if(function == 2) Serial.println("DOUBLE click");
+  // Once done, put all this into a switch/case
+  if(function == 1) {
+    Serial.println("SINGLE click");
+    Homie.setNodeProperty(buttonNode, "event", "SINGLE");
+  }
 
-  if(function == 3) Serial.println("TRIPLE click");
+  if(function == 2) {
+    Homie.setNodeProperty(buttonNode, "event", "DOUBLE");
+    Serial.println("DOUBLE click");
+  }
 
-  if(function == -1) Serial.println("SINGLE LONG click");
+  if(function == 3) {
+    Homie.setNodeProperty(buttonNode, "event", "TRIPLE");
+    Serial.println("TRIPLE click");
+  }
 
-  if(function == -2) Serial.println("DOUBLE LONG click");
+  if(function == -1) {
+    Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD");
+    Serial.println("SINGLE LONG click");
+  }
 
-  if(function == -3) Serial.println("TRIPLE LONG click");
+  if(function == -2) {
+    Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD");
+    Serial.println("DOUBLE LONG click");
+  }
 
+  if(function == -3) {
+    Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD");
+    Serial.println("TRIPLE LONG click");
+  }
+
+
+  // Combine the above into the below
   if ( function > 0 ) {
     // One shot message
     Serial.println("One-shot");
@@ -103,6 +125,7 @@ void loopHandler() {
 
   if ( function < 0 ) {
     if ( button1.depressed == 1 ) {
+      // This will need rate limited
       Serial.println("Held");
     }
     if ( button1.depressed == 0 ) {
