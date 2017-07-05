@@ -4,6 +4,24 @@
 
 A simple Homie based Arduino sketch for the Sonoff Touch switch. This uses the ESP8285 platform instead of the ESP8266, so be sure to set the board correctly. platoformio.ini is configured appropriately.
 
+This firmware decouples the relay from the switch, and allows it to be controlled separately, through MQTT messages.
+
+The topic structure is based on what you set through the Homie configuration, with the following subtopics.
+
+* relaystate/set/ON|OFF
+* button/event
+
+The messages emitted from the button/event node are...
+
+* SINGLE
+* DOUBLE
+* TRIPLE
+* SINGLEHELD
+* DOUBLEHELD
+* TRIPLEHELD
+
+All of the HELD variants will repeat endlessly until the button is released.
+
 Uses the [Homie](https://github.com/marvinroger/homie-esp8266/releases) framework, so you don't need to worry about wireless connectivity, wireless configuration persistence, and all that. Simply compile and upload, and configure using the Homie configuration tool.
 All future flashes will not overwrite the wireless configuration.
 
