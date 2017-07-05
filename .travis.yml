@@ -19,9 +19,6 @@ install:
     - pip install -U platformio
     #- platformio lib -g install clickButton Homie
     - platformio lib -g install clickButton https://github.com/marvinroger/homie-esp8266/archive/master.zip
-    #- sed -i s/'DynamicJsonBuffer generatedJsonBuffer = DynamicJsonBuffer'/'DynamicJsonBuffer generatedJsonBuffer'/ ~/.platformio/lib/Homie_ID555/src/Homie/Boot/BootConfig.cpp
-    #- sed -i s/'DynamicJsonBuffer jsonBuffer = DynamicJsonBuffer'/'DynamicJsonBuffer jsonBuffer'/ ~/.platformio/lib/Homie_ID555/src/Homie/Boot/BootConfig.cpp
-
 
 script:
     - platformio ci --board=esp8285
