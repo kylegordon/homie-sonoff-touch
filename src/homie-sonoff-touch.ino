@@ -38,11 +38,7 @@ volatile unsigned long timestamp = 0;
 
 ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
-int lastbuttonState = -1;
-int ledState = 0;
-int LEDfunction = 0;
 int function = 0;
-int lastmillis = millis();
 
 Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
 
@@ -64,16 +60,6 @@ bool RelayHandler(String value) {
     return false;
   }
   return true;
-}
-
-void shortPress() {
-  Serial.println("Short press");
-  published = true;
-}
-
-void longPress() {
-  Serial.println("Long press");
-  published = true;
 }
 
 void loopHandler() {
