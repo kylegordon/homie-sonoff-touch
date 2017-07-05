@@ -87,31 +87,31 @@ void loopHandler() {
   // Once done, put all this into a switch/case
   if(function == 1) {
     Serial.println("SINGLE click");
-    Homie.setNodeProperty(buttonNode, "event", "SINGLE");
+    Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
   }
 
   if(function == 2) {
-    Homie.setNodeProperty(buttonNode, "event", "DOUBLE");
+    Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
     Serial.println("DOUBLE click");
   }
 
   if(function == 3) {
-    Homie.setNodeProperty(buttonNode, "event", "TRIPLE");
+    Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
     Serial.println("TRIPLE click");
   }
 
   if(function == -1) {
-    Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD");
+    Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
     Serial.println("SINGLE LONG click");
   }
 
   if(function == -2) {
-    Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD");
+    Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
     Serial.println("DOUBLE LONG click");
   }
 
   if(function == -3) {
-    Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD");
+    Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
     Serial.println("TRIPLE LONG click");
   }
 
