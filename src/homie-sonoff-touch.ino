@@ -14,7 +14,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "0.0.8"
+#define FW_VERSION "0.0.9"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -52,11 +52,11 @@ HomieNode buttonNode("button", "button");
 bool RelayHandler(String value) {
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
-    Homie.setNodeProperty(relayNode, "set", value);
+    Homie.setNodeProperty(relayNode, "relayState", value);
     Serial.println("Relay is on");
   } else if (value == "OFF") {
     digitalWrite(PIN_RELAY, LOW);
-    Homie.setNodeProperty(relayNode, "set", value);
+    Homie.setNodeProperty(relayNode, "relayState", value);
     Serial.println("Relay is off");
   } else {
     Serial.print("Unknown value: ");
