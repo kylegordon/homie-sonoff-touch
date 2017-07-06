@@ -14,7 +14,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "0.0.9"
+#define FW_VERSION "0.0.10"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -69,47 +69,43 @@ void loopHandler() {
   // Save click codes in function, as click codes are reset at next Update()
   if(button1.clicks != 0) function = button1.clicks;
 
-
-  // Once done, put all this into a switch/case
-  if(function == 1) {
-    Serial.println("SINGLE click");
-    Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
-  }
-
-  if(function == 2) {
-    Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
-    Serial.println("DOUBLE click");
-  }
-
-  if(function == 3) {
-    Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
-    Serial.println("TRIPLE click");
-  }
-
-  if(function == -1) {
-    Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
-    Serial.println("SINGLE LONG click");
-  }
-
-  if(function == -2) {
-    Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
-    Serial.println("DOUBLE LONG click");
-  }
-
-  if(function == -3) {
-    Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
-    Serial.println("TRIPLE LONG click");
-  }
-
-
-  // Combine the above into the below
   if ( function > 0 ) {
-    // One shot message
     Serial.println("One-shot");
+    if ( function == 1 ) {
+      Serial.println("SINGLE click");
+      Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
+    }
+
+    if ( function == 2 ) {
+      Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
+      Serial.println("DOUBLE click");
+    }
+
+    if ( function == 3 ) {
+      Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
+      Serial.println("TRIPLE click");
+    }
+    // This has been a single event.
     function = 0;
   }
 
   if ( function < 0 ) {
+    if ( function == -1 ) {
+      Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
+      Serial.println("SINGLE LONG click");
+    }
+
+    if ( function == -2 ) {
+      Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
+      Serial.println("DOUBLE LONG click");
+    }
+
+    if ( function == -3 ) {
+      Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
+      Serial.println("TRIPLE LONG click");
+    }
+
+    // Decide whether the button is being held or not
     if ( button1.depressed == 1 ) {
       // This will need rate limited
       Serial.println("Held");
