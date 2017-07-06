@@ -28,3 +28,5 @@ Uses the [Homie](https://github.com/marvinroger/homie-esp8266/releases) framewor
 All future flashes will not overwrite the wireless configuration.
 
 Best used with PlatformIO. Simply git clone, edit ROM IDs as appropriate, pio run -t upload, watch the dependencies download and compile, and then if required do the initial Homie configuration with the tool for Homie 1.5 at http://marvinroger.github.io/homie-esp8266/
+
+To reset the device back to Homie defaults, press the touchpad for over 10 seconds. This will wipe the configuration and drop it into config AP mode. 
