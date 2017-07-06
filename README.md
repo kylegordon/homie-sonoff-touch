@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/kylegordon/homie-sonoff-touch.svg?branch=master)](https://travis-ci.org/kylegordon/homie-sonoff-touch)
 
-# homie-sonoff-touch-multiclick
+# Multiclick Sonoff Touch
 
 Multiclick support for the Sonoff Touch switches. This will allow you to have up to 6 different actions from a single touch switch.
 
