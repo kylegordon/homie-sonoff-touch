@@ -1,6 +1,8 @@
 [![Build Status](https://travis-ci.org/kylegordon/homie-sonoff-touch.svg?branch=master)](https://travis-ci.org/kylegordon/homie-sonoff-touch)
 
-# homie-sonoff-touch
+# homie-sonoff-touch-multiclick
+
+Multiclick support for the Sonoff Touch switches. This will allow you to have up to 6 different actions from a single touch switch.
 
 A simple Homie based Arduino sketch for the Sonoff Touch switch. This uses the ESP8285 platform instead of the ESP8266, so be sure to set the board correctly. platoformio.ini is configured appropriately.
 
