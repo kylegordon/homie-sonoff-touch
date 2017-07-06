@@ -1,0 +1,14 @@
+alias: Sonoff single touch
+trigger:
+  platform: mqtt
+  topic: devices/85376d51/button/event
+  # Optional
+  payload: 'SINGLE'
+
+action:
+  - service: light.toggle
+    entity_id: light.study
+  - service: logbook.log
+    data_template:
+      name: EVENT
+      message: "Toggling study light"
