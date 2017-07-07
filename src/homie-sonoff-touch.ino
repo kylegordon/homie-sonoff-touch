@@ -23,12 +23,19 @@ const int PIN_BUTTON = 0;
 
 int function = 0;
 
+// Associate the PIN_BUTTON GPIO with the ClickButton library
 ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
+// Register our two HomieNode instances
 HomieNode relayNode("relay", "relay");
 HomieNode buttonNode("button", "button");
 
 bool RelayHandler(String value) {
+  /*
+  Here we handle incoming requests to set the state of the relay
+  Set the RELAY_PIN to the appropriate level, and additionally set the
+  state on the relayState topic.
+  */
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
     Homie.setNodeProperty(relayNode, "relayState", value);
@@ -52,6 +59,8 @@ void loopHandler() {
   // Save click codes in function, as click codes are reset at next Update()
   if(button1.clicks != 0) function = button1.clicks;
 
+  // These are single event button presses.
+  // Handle them and reset function back to 0
   if ( function > 0 ) {
     Serial.println("One-shot");
     if ( function == 1 ) {
@@ -72,6 +81,8 @@ void loopHandler() {
     function = 0;
   }
 
+  // These are repeat events, where the button is being held down.
+  // Handle them, but don't reset function back to 0 unless the button is released.
   if ( function < 0 ) {
     if ( function == -1 ) {
       Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
