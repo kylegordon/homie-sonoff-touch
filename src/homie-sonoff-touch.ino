@@ -1,15 +1,3 @@
-/* WARNING: untested */
-
-/* Some functional ideas
-  Single, double and triple tap.
-  Single and double tap and hold
-  Single tap = regular on/off
-  Single hold = dim up
-  Double tap = Unknown
-  Double tap and hold = dim down
-  Triple tap = toggle state of onboard relay
-*/
-
 #include <ClickButton.h>
 #include <Homie.h>
 
