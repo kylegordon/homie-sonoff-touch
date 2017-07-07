@@ -21,14 +21,9 @@ const int PIN_RELAY = 12;
 const int PIN_LED = 13;
 const int PIN_BUTTON = 0;
 
-volatile bool published = false;
-volatile unsigned long timestamp = 0;
-
-ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
-
 int function = 0;
 
-Bounce debouncer = Bounce(); // Bounce is built into Homie, so you can use it without including it first
+ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
 HomieNode relayNode("relay", "relay");
 HomieNode buttonNode("button", "button");
