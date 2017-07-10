@@ -137,7 +137,7 @@ void setup() {
   Homie.setFirmware(FW_NAME, FW_VERSION);
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
   // This is a full reset, and will wipe the config
-  Homie.setResetTrigger(PIN_BUTTON, LOW, 10000);
+  Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
   Homie.setLoopFunction(loopHandler);
   relayNode.subscribe("relayState", RelayHandler);
   Homie.registerNode(relayNode);
