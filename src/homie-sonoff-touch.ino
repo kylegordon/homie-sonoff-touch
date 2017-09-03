@@ -140,8 +140,6 @@ void setup() {
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
   Homie.setLoopFunction(loopHandler);
   // FIXME relayNode.subscribe("relayState", RelayHandler);
-  // FIXME Homie.registerNode(relayNode);
-  // FIXME Homie.registerNode(buttonNode);
   Homie.setup();
 }
 
