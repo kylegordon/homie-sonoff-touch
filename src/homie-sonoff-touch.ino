@@ -43,11 +43,11 @@ bool RelayHandler(String value) {
   */
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
-    // FIXME Homie.setNodeProperty(relayNode, "relayState", value);
+    relayNode.setProperty("relayState").send("ON");
     Serial.println("Relay is on");
   } else if (value == "OFF") {
     digitalWrite(PIN_RELAY, LOW);
-    // FIXME Homie.setNodeProperty(relayNode, "relayState", value);
+    relayNode.setProperty("relayState").send("OFF");
     Serial.println("Relay is off");
   } else {
     Serial.print("Unknown value: ");
@@ -70,16 +70,16 @@ void loopHandler() {
     Serial.println("One-shot");
     if ( function == 1 ) {
       Serial.println("SINGLE click");
-      // FIXME Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
+      buttonNode.setProperty("event").send("SINGLE");
     }
 
     if ( function == 2 ) {
-      // FIXME Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
+      buttonNode.setProperty("event").send("DOUBLE");
       Serial.println("DOUBLE click");
     }
 
     if ( function == 3 ) {
-      // FIXME Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
+      buttonNode.setProperty("event").send("TRIPLE");
       Serial.println("TRIPLE click");
     }
     // This has been a single event.
@@ -92,17 +92,17 @@ void loopHandler() {
     if ( millis() - previousMillis >= waitInterval ) {
       previousMillis = millis();
       if ( function == -1 ) {
-        // FIXME Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
+        buttonNode.setProperty("event").send("SINGLEHELD");
         Serial.println("SINGLE LONG click");
       }
 
       if ( function == -2 ) {
-        // FIXME Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
+        buttonNode.setProperty("event").send("DOUBLEHELD");
         Serial.println("DOUBLE LONG click");
       }
 
       if ( function == -3 ) {
-        // FIXME Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
+        buttonNode.setProperty("event").send("TRIPLEHELD");
         Serial.println("TRIPLE LONG click");
       }
     }
