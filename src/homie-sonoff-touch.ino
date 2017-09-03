@@ -134,7 +134,7 @@ void setup() {
   button1.multiclickTime = 250;  // Time limit for multi clicks
   button1.longClickTime  = 1000; // time until "held-down clicks" register
 
-  // FIXME Homie.setFirmware(FW_NAME, FW_VERSION);
+  Homie_setFirmware(FW_NAME, FW_VERSION);
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
   // This is a full reset, and will wipe the config
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
