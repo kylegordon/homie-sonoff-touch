@@ -2,7 +2,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "1.0.1"
+#define FW_VERSION "2.0.0"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -35,7 +35,7 @@ ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 HomieNode relayNode("relay", "relay");
 HomieNode buttonNode("button", "button");
 
-bool RelayHandler(String value) {
+bool RelayHandler(const HomieRange& range, const String& value) {
   /*
   Here we handle incoming requests to set the state of the relay
   Set the RELAY_PIN to the appropriate level, and additionally set the
@@ -43,11 +43,11 @@ bool RelayHandler(String value) {
   */
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
-    Homie.setNodeProperty(relayNode, "relayState", value);
+    relayNode.setProperty("relayState").send("ON");
     Serial.println("Relay is on");
   } else if (value == "OFF") {
     digitalWrite(PIN_RELAY, LOW);
-    Homie.setNodeProperty(relayNode, "relayState", value);
+    relayNode.setProperty("relayState").send("OFF");
     Serial.println("Relay is off");
   } else {
     Serial.print("Unknown value: ");
@@ -70,16 +70,16 @@ void loopHandler() {
     Serial.println("One-shot");
     if ( function == 1 ) {
       Serial.println("SINGLE click");
-      Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
+      buttonNode.setProperty("event").send("SINGLE");
     }
 
     if ( function == 2 ) {
-      Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
+      buttonNode.setProperty("event").send("DOUBLE");
       Serial.println("DOUBLE click");
     }
 
     if ( function == 3 ) {
-      Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
+      buttonNode.setProperty("event").send("TRIPLE");
       Serial.println("TRIPLE click");
     }
     // This has been a single event.
@@ -92,17 +92,17 @@ void loopHandler() {
     if ( millis() - previousMillis >= waitInterval ) {
       previousMillis = millis();
       if ( function == -1 ) {
-        Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
+        buttonNode.setProperty("event").send("SINGLEHELD");
         Serial.println("SINGLE LONG click");
       }
 
       if ( function == -2 ) {
-        Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
+        buttonNode.setProperty("event").send("DOUBLEHELD");
         Serial.println("DOUBLE LONG click");
       }
 
       if ( function == -3 ) {
-        Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
+        buttonNode.setProperty("event").send("TRIPLEHELD");
         Serial.println("TRIPLE LONG click");
       }
     }
@@ -134,14 +134,12 @@ void setup() {
   button1.multiclickTime = 250;  // Time limit for multi clicks
   button1.longClickTime  = 1000; // time until "held-down clicks" register
 
-  Homie.setFirmware(FW_NAME, FW_VERSION);
+  Homie_setFirmware(FW_NAME, FW_VERSION);
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
   // This is a full reset, and will wipe the config
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
   Homie.setLoopFunction(loopHandler);
-  relayNode.subscribe("relayState", RelayHandler);
-  Homie.registerNode(relayNode);
-  Homie.registerNode(buttonNode);
+  relayNode.advertise("relayState").settable(RelayHandler);
   Homie.setup();
 }
 

@@ -29,4 +29,15 @@ All future flashes will not overwrite the wireless configuration.
 
 Best used with PlatformIO. Simply git clone, edit ROM IDs as appropriate, pio run -t upload, watch the dependencies download and compile, and then if required do the initial Homie configuration with the tool for Homie 1.5 at http://marvinroger.github.io/homie-esp8266/
 
-To reset the device back to Homie defaults, press the touchpad for over 10 seconds. This will wipe the configuration and drop it into config AP mode. 
+To reset the device back to Homie defaults, press the touchpad for over 10 seconds. This will wipe the configuration and drop it into config AP mode.
+
+# Updating
+
+To use Homie built in OTA updater...
+./ota_updater.py -l 172.24.32.13 -t devices/ -i 60019485376d /home/kyleg/Projects/homie-sonoff-touch/.pioenvs/esp8285/firmware.bin
+
+# Renaming
+
+To change the config, eg, device name, in flight...
+Use the 'devices/60019485376d/$implementation/config/set topic, such as...
+mosquitto_pub -h homeauto.vpn.glasgownet.com -t 'devices/60019485376d/$implementation/config/set' -m '{"wifi":{"ssid":"Glasgownet"},"mqtt":{"host":"172.24.32.13","port":1883,"base_topic":"devices/","auth":false},"name":"bedroom-wall-switch","ota":{"enabled":true}}'

@@ -18,7 +18,7 @@ env:
 install:
     - pip install -U platformio
     #- platformio lib -g install clickButton Homie
-    - platformio lib -g install clickButton https://github.com/marvinroger/homie-esp8266/archive/master.zip
+    - platformio lib -g install clickButton https://github.com/marvinroger/homie-esp8266/archive/develop.zip
 
 script:
     - platformio ci --board=esp8285
