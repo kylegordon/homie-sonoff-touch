@@ -39,7 +39,7 @@ ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 HomieNode relayNode("relay", "relay");
 HomieNode buttonNode("button", "button");
 
-bool RelayHandler(String value) {
+bool RelayHandler(const HomieRange& range, const String& value) {
   /*
   Here we handle incoming requests to set the state of the relay
   Set the RELAY_PIN to the appropriate level, and additionally set the
@@ -143,7 +143,7 @@ void setup() {
   // This is a full reset, and will wipe the config
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
   Homie.setLoopFunction(loopHandler);
-  // FIXME relayNode.subscribe("relayState", RelayHandler);
+  relayNode.advertise("relayState").settable(RelayHandler);
   Homie.setup();
 }
 
