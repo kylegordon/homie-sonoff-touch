@@ -70,16 +70,16 @@ void loopHandler() {
     Serial.println("One-shot");
     if ( function == 1 ) {
       Serial.println("SINGLE click");
-      Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
+      // FIXME Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
     }
 
     if ( function == 2 ) {
-      Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
+      // FIXME Homie.setNodeProperty(buttonNode, "event", "DOUBLE", 0);
       Serial.println("DOUBLE click");
     }
 
     if ( function == 3 ) {
-      Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
+      // FIXME Homie.setNodeProperty(buttonNode, "event", "TRIPLE", 0);
       Serial.println("TRIPLE click");
     }
     // This has been a single event.
@@ -92,17 +92,17 @@ void loopHandler() {
     if ( millis() - previousMillis >= waitInterval ) {
       previousMillis = millis();
       if ( function == -1 ) {
-        Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
+        // FIXME Homie.setNodeProperty(buttonNode, "event", "SINGLEHELD", 0);
         Serial.println("SINGLE LONG click");
       }
 
       if ( function == -2 ) {
-        Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
+        // FIXME Homie.setNodeProperty(buttonNode, "event", "DOUBLEHELD", 0);
         Serial.println("DOUBLE LONG click");
       }
 
       if ( function == -3 ) {
-        Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
+        // FIXME Homie.setNodeProperty(buttonNode, "event", "TRIPLEHELD", 0);
         Serial.println("TRIPLE LONG click");
       }
     }
