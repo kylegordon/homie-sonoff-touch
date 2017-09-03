@@ -71,7 +71,6 @@ void loopHandler() {
     if ( function == 1 ) {
       Serial.println("SINGLE click");
       // FIXME Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
-
     }
 
     if ( function == 2 ) {
@@ -135,14 +134,14 @@ void setup() {
   button1.multiclickTime = 250;  // Time limit for multi clicks
   button1.longClickTime  = 1000; // time until "held-down clicks" register
 
-  Homie.setFirmware(FW_NAME, FW_VERSION);
+  // FIXME Homie.setFirmware(FW_NAME, FW_VERSION);
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
   // This is a full reset, and will wipe the config
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
   Homie.setLoopFunction(loopHandler);
-  relayNode.subscribe("relayState", RelayHandler);
-  Homie.registerNode(relayNode);
-  Homie.registerNode(buttonNode);
+  // FIXME relayNode.subscribe("relayState", RelayHandler);
+  // FIXME Homie.registerNode(relayNode);
+  // FIXME Homie.registerNode(buttonNode);
   Homie.setup();
 }
 
