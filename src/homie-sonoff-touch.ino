@@ -9,6 +9,10 @@ const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7
 const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x48\xd4\x1a";
 /* End of magic sequence for Autodetectable Binary Upload */
 
+/* To use Homie built in OTA updater...
+./ota_updater.py -l 172.24.32.13 -t devices/ -i 60019485376d /home/kyleg/Projects/homie-sonoff-touch/.pioenvs/esp8285/firmware.bin
+*/
+
 // LED_PIN controls the LED under the wifi symbol on the front plate.
 // RELAY_PIN controls the relay, *AND* the LED under the touchpad.
 // Scheme is similar to https://github.com/enc-X/sonoff-homie
