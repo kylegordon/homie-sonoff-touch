@@ -43,11 +43,11 @@ bool RelayHandler(String value) {
   */
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
-    Homie.setNodeProperty(relayNode, "relayState", value);
+    // FIXME Homie.setNodeProperty(relayNode, "relayState", value);
     Serial.println("Relay is on");
   } else if (value == "OFF") {
     digitalWrite(PIN_RELAY, LOW);
-    Homie.setNodeProperty(relayNode, "relayState", value);
+    // FIXME Homie.setNodeProperty(relayNode, "relayState", value);
     Serial.println("Relay is off");
   } else {
     Serial.print("Unknown value: ");
@@ -71,6 +71,7 @@ void loopHandler() {
     if ( function == 1 ) {
       Serial.println("SINGLE click");
       // FIXME Homie.setNodeProperty(buttonNode, "event", "SINGLE", 0);
+
     }
 
     if ( function == 2 ) {
