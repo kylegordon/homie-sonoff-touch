@@ -2,7 +2,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.0"
+#define FW_VERSION "2.0.1"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -32,8 +32,9 @@ const int waitInterval = 100;
 ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
 // Register our two HomieNode instances
+// nodeName(property, value, retained);
 HomieNode relayNode("relay", "relay");
-HomieNode buttonNode("button", "button");
+HomieNode buttonNode("button", "button", false);
 
 bool RelayHandler(const HomieRange& range, const String& value) {
   /*
