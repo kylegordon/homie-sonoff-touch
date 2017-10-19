@@ -2,7 +2,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.1"
+#define FW_VERSION "2.0.2"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -34,7 +34,8 @@ ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 // Register our two HomieNode instances
 // nodeName(property, value, retained);
 HomieNode relayNode("relay", "relay");
-HomieNode buttonNode("button", "button", false);
+//HomieNode buttonNode("button", "button", false);
+HomieNode buttonNode("button", "button");
 
 bool RelayHandler(const HomieRange& range, const String& value) {
   /*
@@ -71,16 +72,16 @@ void loopHandler() {
     Serial.println("One-shot");
     if ( function == 1 ) {
       Serial.println("SINGLE click");
-      buttonNode.setProperty("event").send("SINGLE");
+      buttonNode.setProperty("event").setRetained(false).send("SINGLE");
     }
 
     if ( function == 2 ) {
-      buttonNode.setProperty("event").send("DOUBLE");
+      buttonNode.setProperty("event").setRetained(false).send("DOUBLE");
       Serial.println("DOUBLE click");
     }
 
     if ( function == 3 ) {
-      buttonNode.setProperty("event").send("TRIPLE");
+      buttonNode.setProperty("event").setRetained(false).send("TRIPLE");
       Serial.println("TRIPLE click");
     }
     // This has been a single event.
@@ -93,17 +94,17 @@ void loopHandler() {
     if ( millis() - previousMillis >= waitInterval ) {
       previousMillis = millis();
       if ( function == -1 ) {
-        buttonNode.setProperty("event").send("SINGLEHELD");
+        buttonNode.setProperty("event").setRetained(false).send("SINGLEHELD");
         Serial.println("SINGLE LONG click");
       }
 
       if ( function == -2 ) {
-        buttonNode.setProperty("event").send("DOUBLEHELD");
+        buttonNode.setProperty("event").setRetained(false).send("DOUBLEHELD");
         Serial.println("DOUBLE LONG click");
       }
 
       if ( function == -3 ) {
-        buttonNode.setProperty("event").send("TRIPLEHELD");
+        buttonNode.setProperty("event").setRetained(false).send("TRIPLEHELD");
         Serial.println("TRIPLE LONG click");
       }
     }
