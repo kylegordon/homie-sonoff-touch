@@ -32,9 +32,7 @@ const int waitInterval = 100;
 ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
 // Register our two HomieNode instances
-// nodeName(property, value, retained);
 HomieNode relayNode("relay", "relay");
-//HomieNode buttonNode("button", "button", false);
 HomieNode buttonNode("button", "button");
 
 bool RelayHandler(const HomieRange& range, const String& value) {
