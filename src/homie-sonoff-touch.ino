@@ -22,6 +22,7 @@ const int PIN_LED = 13;
 const int PIN_BUTTON = 0;
 
 int function = 0;
+unsigned long connectedMillis = 0;
 
 // Timer related for dimming delays
 unsigned long previousMillis = 0;
@@ -58,6 +59,17 @@ bool RelayHandler(const HomieRange& range, const String& value) {
 }
 
 void loopHandler() {
+
+  if ( Homie.isConnected() ) {
+    // This counter will stop when disconnected
+    connectedMillis = millis();
+  } else {
+    if (millis() - connectedMillis >= 60000 ) {
+      Serial.println("Restarting in ten seconds");
+      delay(10000);
+      ESP.restart();
+    };
+  }
   // Update button state
   button1.Update();
 
