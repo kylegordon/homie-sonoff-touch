@@ -2,7 +2,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.2"
+#define FW_VERSION "2.0.3"
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -60,17 +60,6 @@ bool RelayHandler(const HomieRange& range, const String& value) {
 
 void loopHandler() {
 
-  if ( Homie.isConnected() ) {
-    // This counter will stop when disconnected
-    connectedMillis = millis();
-  } else {
-    if (millis() - connectedMillis >= 60000 ) {
-      Serial.println("Restarting in ten seconds");
-      delay(10000);
-      //FIXME Don't do this during an update!
-      ESP.restart();
-    };
-  }
   // Update button state
   button1.Update();
 
@@ -157,5 +146,19 @@ void setup() {
 }
 
 void loop() {
+
+  if ( Homie.isConnected() ) {
+    // This counter will stop when disconnected
+    connectedMillis = millis();
+  } else {
+    // If disconnected for over 5 minutes
+    if ( millis() - connectedMillis >= 300000 ) {
+      Serial.println("Restarting in ten seconds");
+      delay(10000);
+      // The chances of being in OTA whilst disconnected from MQTT are slim.
+      ESP.restart();
+    };
+  }
+
   Homie.loop();
 }
