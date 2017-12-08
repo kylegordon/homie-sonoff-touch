@@ -67,6 +67,7 @@ void loopHandler() {
     if (millis() - connectedMillis >= 60000 ) {
       Serial.println("Restarting in ten seconds");
       delay(10000);
+      //FIXME Don't do this during an update!
       ESP.restart();
     };
   }
