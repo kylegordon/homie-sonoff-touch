@@ -29,12 +29,81 @@ unsigned long previousMillis = 0;
 // Milliseconds to wait per cycle for a held command.
 const int waitInterval = 100;
 
+// EEPROM structure
+struct EEpromDataStruct {
+  int keepAliveTimeOut; // 0 - disabled, keepalive time - seconds
+  bool initialState;  // Initial state (just after boot - homie independet)
+  int watchDogTimeOut; // 0 - disabled, watchdog time limit - seconds
+};
+
+EEpromDataStruct EEpromData;
+
 // Associate the PIN_BUTTON GPIO with the ClickButton library
 ClickButton button1(PIN_BUTTON, LOW, CLICKBTN_PULLUP);
 
 // Register our two HomieNode instances
 HomieNode relayNode("relay", "relay");
 HomieNode buttonNode("button", "button");
+HomieNode keepAliveNode("keepalive", "keepalive");
+HomieNode watchDogNode("watchdog", "Watchdog mode");
+
+/*
+ * Recevied tick message for watchdog
+ */
+bool watchdogTickHandler(const HomieRange& range, const String& value)
+{
+  if (value == "0")
+  {
+    watchDogCounterStart = 0;
+  } else {
+    watchDogCounterStart = millis();
+  }
+  return true;
+}
+/*
+ * Received watchdog timeout value
+ */
+bool watchdogTimeOutHandler(const HomieRange& range, const String& value)
+{
+  int oldValue = EEpromData.watchDogTimeOut;
+  if (value.toInt() > 15)
+  {
+    EEpromData.watchDogTimeOut = value.toInt();
+  }
+  if (value=="0")
+  {
+    EEpromData.watchDogTimeOut = 0;
+  }
+
+  if (oldValue!=EEpromData.watchDogTimeOut)
+  {
+    String outMsg = String(EEpromData.watchDogTimeOut);
+    watchDogNode.setProperty("timeOut").send(outMsg);
+    EEPROM.put(0, EEpromData);
+    EEPROM.commit();
+  }
+}
+/*
+ * Initial mode handler
+ */
+bool relayInitModeHandler(HomieRange range, String value)
+{
+  int oldValue = EEpromData.initialState;
+  if (value.toInt() == 1 or value=="ON")
+  {
+    relayNode.setProperty("relayInitMode").send("1");
+    EEpromData.initialState=1;
+  } else {
+    relayNode.setProperty("relayInitMode").send( "0");
+    EEpromData.initialState=0;
+  }
+  if (oldValue!=EEpromData.initialState)
+  {
+    EEPROM.put(0, EEpromData);
+    EEPROM.commit();
+  }
+  return true;
+}
 
 bool RelayHandler(const HomieRange& range, const String& value) {
   /*
@@ -138,8 +207,17 @@ void loopHandler() {
 }
 
 void setup() {
+  EEPROM.begin(sizeof(EEpromData));
+  EEPROM.get(0,EEpromData);
   pinMode(PIN_RELAY, OUTPUT);
-  digitalWrite(PIN_RELAY, LOW);
+  //digitalWrite(PIN_RELAY, LOW);
+  if (EEpromData.initialState)
+  {
+    digitalWrite(PIN_RELAY,1);
+  } else {
+    digitalWrite(PIN_RELAY,0);
+    EEpromData.initialState=0;
+  }
 
   // Setup button timers (all in milliseconds / ms)
   // (These are default if not set, but changeable for convenience)
@@ -151,8 +229,17 @@ void setup() {
   Homie.setLedPin(PIN_LED, HIGH); // Status LED
   // This is a full reset, and will wipe the config
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
+  Homie.setSetupFunction(setupHandler);
   Homie.setLoopFunction(loopHandler);
   relayNode.advertise("relayState").settable(RelayHandler);
+  relayNode.advertise("relayTimer").settable(relayTimerHandler);
+  relayNode.advertise("relayInitMode").settable(relayInitModeHandler);
+  watchDogNode.advertise("tick").settable(watchdogTickHandler);
+  watchDogNode.advertise("timeOut").settable(watchdogTimeOutHandler);
+  keepAliveNode.advertise("tick").settable(keepAliveTickHandler);
+  keepAliveNode.advertise("timeOut").settable(keepAliveTimeOutHandler);
+
+  Homie.onEvent(onHomieEvent);
   Homie.setup();
 }
 
