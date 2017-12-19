@@ -1,5 +1,6 @@
 #include <ClickButton.h>
 #include <Homie.h>
+#include <EEPROM.h>
 
 #define FW_NAME "homie-sonoff-touch"
 #define FW_VERSION "2.0.2"
@@ -23,6 +24,8 @@ const int PIN_BUTTON = 0;
 
 int function = 0;
 unsigned long connectedMillis = 0;
+unsigned long watchDogCounterStart=0;
+unsigned long keepAliveReceived=0;
 
 // Timer related for dimming delays
 unsigned long previousMillis = 0;
@@ -105,6 +108,30 @@ bool relayInitModeHandler(HomieRange range, String value)
   return true;
 }
 
+/*
+ * Homie setup handler
+ */
+void setupHandler()
+{
+  HomieRange emptyRange;
+  if (EEpromData.initialState) {
+    RelayHandler(emptyRange, "ON");
+    relayNode.setProperty("relayInitMode").send("1");
+  } else {
+    RelayHandler(emptyRange, "OFF");
+    relayNode.setProperty("relayInitMode").send("0");
+  }
+  String outMsg = String(EEpromData.keepAliveTimeOut);
+  keepAliveNode.setProperty("timeOut").send(outMsg);
+  outMsg = EEpromData.watchDogTimeOut;
+  watchDogNode.setProperty("timeOut").send(outMsg);
+  keepAliveReceived=millis();
+  #ifdef SONOFFS20
+  digitalWrite(PIN_LED, LOW);
+  ledNode.setProperty("state").send("off");
+  #endif
+}
+
 bool RelayHandler(const HomieRange& range, const String& value) {
   /*
   Here we handle incoming requests to set the state of the relay
@@ -125,6 +152,38 @@ bool RelayHandler(const HomieRange& range, const String& value) {
     return false;
   }
   return true;
+}
+
+/*
+ * Keepliave tick handler
+ */
+bool keepAliveTickHandler(HomieRange range, String value)
+{
+  keepAliveReceived=millis();
+  return true;
+}
+
+/*
+ * Keepalive message handler
+ */
+bool keepAliveTimeOutHandler(HomieRange range, String value)
+{
+  int oldValue = EEpromData.keepAliveTimeOut;
+  if (value.toInt() > 0)
+  {
+    EEpromData.keepAliveTimeOut = value.toInt();
+  }
+  if (value=="0")
+  {
+    EEpromData.keepAliveTimeOut = 0;
+  }
+  if (oldValue!=EEpromData.keepAliveTimeOut)
+  {
+    String outMsg = String(EEpromData.keepAliveTimeOut);
+    keepAliveNode.setProperty("timeOut").send(outMsg);
+    EEPROM.put(0, EEpromData);
+    EEPROM.commit();
+  }
 }
 
 void loopHandler() {
@@ -206,6 +265,41 @@ void loopHandler() {
 
 }
 
+/*
+ * Homie event handler
+ */
+void onHomieEvent(const HomieEvent& event) {
+  switch(event.type) {
+    case HomieEventType::CONFIGURATION_MODE: // Default eeprom data in configuration mode
+      digitalWrite(PIN_RELAY, LOW);
+      EEpromData.keepAliveTimeOut = 0;
+      EEpromData.initialState = false;
+      EEpromData.watchDogTimeOut = 0;
+      EEPROM.put(0, EEpromData);
+      EEPROM.commit();
+      break;
+    case HomieEventType::NORMAL_MODE:
+      // Do whatever you want when normal mode is started
+      break;
+    case HomieEventType::OTA_STARTED:
+      // Do whatever you want when OTA mode is started
+      digitalWrite(PIN_RELAY, LOW);
+      break;
+    case HomieEventType::ABOUT_TO_RESET:
+      // Do whatever you want when the device is about to reset
+      break;
+    case HomieEventType::WIFI_CONNECTED:
+      // Do whatever you want when Wi-Fi is connected in normal mode
+      break;
+    case HomieEventType::WIFI_DISCONNECTED:
+      // Do whatever you want when Wi-Fi is disconnected in normal mode
+      break;
+    case HomieEventType::MQTT_DISCONNECTED:
+      // Do whatever you want when MQTT is disconnected in normal mode
+      break;
+  }
+}
+
 void setup() {
   EEPROM.begin(sizeof(EEpromData));
   EEPROM.get(0,EEpromData);
@@ -232,7 +326,7 @@ void setup() {
   Homie.setSetupFunction(setupHandler);
   Homie.setLoopFunction(loopHandler);
   relayNode.advertise("relayState").settable(RelayHandler);
-  relayNode.advertise("relayTimer").settable(relayTimerHandler);
+  //relayNode.advertise("relayTimer").settable(relayTimerHandler);
   relayNode.advertise("relayInitMode").settable(relayInitModeHandler);
   watchDogNode.advertise("tick").settable(watchdogTickHandler);
   watchDogNode.advertise("timeOut").settable(watchdogTimeOutHandler);
