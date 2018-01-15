@@ -4,6 +4,9 @@
 #define FW_NAME "homie-sonoff-touch"
 #define FW_VERSION "2.0.3"
 
+// Disable this if you don't want the relay to turn on with any single tap event
+#define IMMEDIATEON
+
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
 const char *__FLAGGED_FW_VERSION = "\x6a\x3f\x3e\x0e\xe1" FW_VERSION "\xb0\x30\x48\xd4\x1a";
@@ -73,6 +76,11 @@ void loopHandler() {
     if ( function == 1 ) {
       Serial.println("SINGLE click");
       buttonNode.setProperty("event").setRetained(false).send("SINGLE");
+      #ifdef IMMEDIATEON
+        digitalWrite(PIN_RELAY, HIGH);
+        relayNode.setProperty("relayState").send("ON");
+        Serial.println("Relay is on");
+      #endif
     }
 
     if ( function == 2 ) {
