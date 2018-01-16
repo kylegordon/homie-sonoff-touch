@@ -74,13 +74,13 @@ void loopHandler() {
   if ( function > 0 ) {
     Serial.println("One-shot");
     if ( function == 1 ) {
-      Serial.println("SINGLE click");
-      buttonNode.setProperty("event").setRetained(false).send("SINGLE");
       #ifdef IMMEDIATEON
         digitalWrite(PIN_RELAY, HIGH);
         relayNode.setProperty("relayState").send("ON");
         Serial.println("Relay is on");
       #endif
+      Serial.println("SINGLE click");
+      buttonNode.setProperty("event").setRetained(false).send("SINGLE");
     }
 
     if ( function == 2 ) {
