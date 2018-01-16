@@ -2,7 +2,7 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.4"
+#define FW_VERSION "2.0.5"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 #define IMMEDIATEON
@@ -126,11 +126,9 @@ void loopHandler() {
       Serial.println("Released");
       function = 0;
     }
-  // Rate limit...
-
+    // Rate limit...
+    delay(5);
   }
-
-  delay(5);
 
 }
 
