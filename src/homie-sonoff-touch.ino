@@ -2,7 +2,10 @@
 #include <Homie.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.3"
+#define FW_VERSION "2.0.5"
+
+// Disable this if you don't want the relay to turn on with any single tap event
+#define IMMEDIATEON
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -71,6 +74,11 @@ void loopHandler() {
   if ( function > 0 ) {
     Serial.println("One-shot");
     if ( function == 1 ) {
+      #ifdef IMMEDIATEON
+        digitalWrite(PIN_RELAY, HIGH);
+        relayNode.setProperty("relayState").send("ON");
+        Serial.println("Relay is on");
+      #endif
       Serial.println("SINGLE click");
       buttonNode.setProperty("event").setRetained(false).send("SINGLE");
     }
@@ -118,11 +126,9 @@ void loopHandler() {
       Serial.println("Released");
       function = 0;
     }
-  // Rate limit...
-
+    // Rate limit...
+    delay(5);
   }
-
-  delay(5);
 
 }
 
