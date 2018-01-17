@@ -3,7 +3,7 @@
 #include <EEPROM.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.5"
+#define FW_VERSION "2.0.6"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 #define IMMEDIATEON
@@ -190,18 +190,18 @@ bool keepAliveTimeOutHandler(HomieRange range, String value)
 }
 
 void loopHandler() {
-
-  if ( Homie.isConnected() ) {
-    // This counter will stop when disconnected
-    connectedMillis = millis();
-  } else {
-    if (millis() - connectedMillis >= 60000 ) {
-      Serial.println("Restarting in ten seconds");
-      delay(10000);
-      //FIXME Don't do this during an update!
-      ESP.restart();
-    };
+  // Check if keepalive is supported and expired
+  if (EEpromData.keepAliveTimeOut != 0 && (millis() - keepAliveReceived) > EEpromData.keepAliveTimeOut*1000 )
+  {
+    ESP.restart();
   }
+  if (watchDogCounterStart!=0 && EEpromData.watchDogTimeOut!=0 && (millis() - watchDogCounterStart) > EEpromData.watchDogTimeOut * 1000 )
+  {
+    HomieRange emptyRange;
+    //relayTimerHandler(emptyRange, "10"); // Disable relay for 10 sec
+    watchDogCounterStart = millis();
+  }
+
   // Update button state
   button1.Update();
 
