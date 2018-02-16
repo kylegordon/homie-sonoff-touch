@@ -47,6 +47,7 @@ mosquitto_pub -h homeauto.vpn.glasgownet.com -t 'devices/60019485376d/$implement
 Very occasionally, the Homie stack will fail to reconnect after the resumption of wireless connectivity. The watchdog uses most of the same code from https://github.com/enc-X/sonoff-homie and simply needs to be 'set' and 'ticked' periodically. 
 
 To set it, publish to the ```devices/$device/keepalive/timeOut/set``` topic To provide a tick, publish to the ```device/keepalive/tick/set``` topic.
+To disable the watchdog feature, publish 0 to ```device/keepalive/timeOut/set``` and ```device/keepalive/tick/set```
 
 Firstly this sets the timeout period before a reboot, and the second publish causes the watchdog timer to reset. If the tick publish is not received, the device will restart.
 
