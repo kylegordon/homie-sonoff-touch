@@ -41,3 +41,22 @@ To use Homie built in OTA updater...
 To change the config, eg, device name, in flight...
 Use the 'devices/60019485376d/$implementation/config/set topic, such as...
 mosquitto_pub -h homeauto.vpn.glasgownet.com -t 'devices/60019485376d/$implementation/config/set' -m '{"wifi":{"ssid":"Glasgownet"},"mqtt":{"host":"172.24.32.13","port":1883,"base_topic":"devices/","auth":false},"name":"bedroom-wall-switch","ota":{"enabled":true}}'
+
+# Watchdog feature
+
+Very occasionally, the Homie stack will fail to reconnect after the resumption of wireless connectivity. The watchdog uses most of the same code from https://github.com/enc-X/sonoff-homie and simply needs to be 'set' and 'ticked' periodically. 
+
+To set it, publish to the ```devices/$device/keepalive/timeOut/set``` topic To provide a tick, publish to the ```device/keepalive/tick/set``` topic.
+To disable the watchdog feature, publish 0 to ```device/keepalive/timeOut/set``` and ```device/keepalive/tick/set```
+
+Firstly this sets the timeout period before a reboot, and the second publish causes the watchdog timer to reset. If the tick publish is not received, the device will restart.
+
+The following script will cycle through a list of devices on the broker, and set their timeout to be 5 minutes and 10 seconds. The script can then run every 5 minutes via crontab.
+
+```for device in 5ccf7faf5486 5ccf7faf630b 60019416854d 5ccf7fe9b845
+60019485376d 60019485412a 6001949b9222 6001948e0f19 6001948e0f70
+do
+    mosquitto_pub -h homeauto.vpn.glasgownet.com -t devices/$device/keepalive/timeOut/set -m '610'
+    mosquitto_pub -h homeauto.vpn.glasgownet.com -t devices/$device/keepalive/tick/set -m 'tick'
+done
+```
