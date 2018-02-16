@@ -55,9 +55,7 @@ The following script will cycle through a list of devices on the broker, and set
 ```for device in 5ccf7faf5486 5ccf7faf630b 60019416854d 5ccf7fe9b845
 60019485376d 60019485412a 6001949b9222 6001948e0f19 6001948e0f70
 do
-    mosquitto_pub -h homeauto.vpn.glasgownet.com -t
-devices/$device/keepalive/timeOut/set -m '610'
-    mosquitto_pub -h homeauto.vpn.glasgownet.com -t
-devices/$device/keepalive/tick/set -m 'tick'
+    mosquitto_pub -h homeauto.vpn.glasgownet.com -t devices/$device/keepalive/timeOut/set -m '610'
+    mosquitto_pub -h homeauto.vpn.glasgownet.com -t devices/$device/keepalive/tick/set -m 'tick'
 done
 ```
