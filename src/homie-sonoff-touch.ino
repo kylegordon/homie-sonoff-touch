@@ -35,8 +35,8 @@ unsigned long previousMillis = 0;
 // Milliseconds to wait per cycle for a held command.
 const int waitInterval = 100;
 
-// EEPROM structure
 struct EEpromDataStruct {
+  // EEPROM structure
   int keepAliveTimeOut; // 0 - disabled, keepalive time - seconds
   bool initialState;  // Initial state (just after boot - homie independet)
   int watchDogTimeOut; // 0 - disabled, watchdog time limit - seconds
@@ -53,11 +53,8 @@ HomieNode buttonNode("button", "button");
 HomieNode keepAliveNode("keepalive", "keepalive");
 HomieNode watchDogNode("watchdog", "Watchdog mode");
 
-/*
- * Recevied tick message for watchdog
- */
-bool watchdogTickHandler(const HomieRange& range, const String& value)
-{
+bool watchdogTickHandler(const HomieRange& range, const String& value) {
+  // Recevied tick message for watchdog
   if (value == "0")
   {
     watchDogCounterStart = 0;
@@ -66,11 +63,9 @@ bool watchdogTickHandler(const HomieRange& range, const String& value)
   }
   return true;
 }
-/*
- * Received watchdog timeout value
- */
-bool watchdogTimeOutHandler(const HomieRange& range, const String& value)
-{
+
+bool watchdogTimeOutHandler(const HomieRange& range, const String& value) {
+  // Received watchdog timeout value
   int oldValue = EEpromData.watchDogTimeOut;
   if (value.toInt() > 15)
   {
@@ -89,11 +84,9 @@ bool watchdogTimeOutHandler(const HomieRange& range, const String& value)
     EEPROM.commit();
   }
 }
-/*
- * Initial mode handler
- */
-bool relayInitModeHandler(HomieRange range, String value)
-{
+
+bool relayInitModeHandler(HomieRange range, String value) {
+  // Initial mode handler
   int oldValue = EEpromData.initialState;
   if (value.toInt() == 1 or value=="ON")
   {
@@ -111,11 +104,8 @@ bool relayInitModeHandler(HomieRange range, String value)
   return true;
 }
 
-/*
- * Homie setup handler
- */
-void setupHandler()
-{
+void setupHandler() {
+  // Homie setup handler
   HomieRange emptyRange;
   if (EEpromData.initialState) {
     RelayHandler(emptyRange, "ON");
@@ -136,11 +126,9 @@ void setupHandler()
 }
 
 bool RelayHandler(const HomieRange& range, const String& value) {
-  /*
-  Here we handle incoming requests to set the state of the relay
-  Set the RELAY_PIN to the appropriate level, and additionally set the
-  state on the relayState topic.
-  */
+  // Here we handle incoming requests to set the state of the relay
+  // Set the RELAY_PIN to the appropriate level, and additionally set the
+  // state on the relayState topic.
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
     relayNode.setProperty("relayState").send("ON");
@@ -157,20 +145,14 @@ bool RelayHandler(const HomieRange& range, const String& value) {
   return true;
 }
 
-/*
- * Keepliave tick handler
- */
-bool keepAliveTickHandler(HomieRange range, String value)
-{
+bool keepAliveTickHandler(HomieRange range, String value) {
+  // Keepalive tick handler
   keepAliveReceived=millis();
   return true;
 }
 
-/*
- * Keepalive message handler
- */
-bool keepAliveTimeOutHandler(HomieRange range, String value)
-{
+bool keepAliveTimeOutHandler(HomieRange range, String value) {
+  // Keepalive message handler
   int oldValue = EEpromData.keepAliveTimeOut;
   if (value.toInt() > 0)
   {
@@ -271,10 +253,8 @@ void loopHandler() {
 
   }
 
-/*
- * Homie event handler
- */
 void onHomieEvent(const HomieEvent& event) {
+  // Homie event handler
   switch(event.type) {
     case HomieEventType::CONFIGURATION_MODE: // Default eeprom data in configuration mode
       digitalWrite(PIN_RELAY, LOW);
