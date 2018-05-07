@@ -3,10 +3,9 @@
 #include <EEPROM.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.6"
+#define FW_VERSION "2.0.7"
 
 // Disable this if you don't want the relay to turn on with any single tap event
-#define IMMEDIATEON
 
 /* Magic sequence for Autodetectable Binary Upload */
 const char *__FLAGGED_FW_NAME = "\xbf\x84\xe4\x13\x54" FW_NAME "\x93\x44\x6b\xa7\x75";
@@ -131,11 +130,11 @@ bool RelayHandler(const HomieRange& range, const String& value) {
   // state on the relayState topic.
   if (value == "ON") {
     digitalWrite(PIN_RELAY, HIGH);
-    relayNode.setProperty("relayState").send("ON");
+    if ( Homie.isConnected() ) { relayNode.setProperty("relayState").send("ON"); }
     Serial.println("Relay is on");
   } else if (value == "OFF") {
     digitalWrite(PIN_RELAY, LOW);
-    relayNode.setProperty("relayState").send("OFF");
+    if ( Homie.isConnected() ) { relayNode.setProperty("relayState").send("OFF"); }
     Serial.println("Relay is off");
   } else {
     Serial.print("Unknown value: ");
@@ -171,87 +170,9 @@ bool keepAliveTimeOutHandler(HomieRange range, String value) {
   }
 }
 
-void loopHandler() {
-  // Check if keepalive is supported and expired
-  if (EEpromData.keepAliveTimeOut != 0 && (millis() - keepAliveReceived) > EEpromData.keepAliveTimeOut*1000 )
-  {
-    ESP.restart();
-  }
-  if (watchDogCounterStart!=0 && EEpromData.watchDogTimeOut!=0 && (millis() - watchDogCounterStart) > EEpromData.watchDogTimeOut * 1000 )
-  {
-    HomieRange emptyRange;
-    //relayTimerHandler(emptyRange, "10"); // Disable relay for 10 sec
-    watchDogCounterStart = millis();
-  }
-
-  // Update button state
-  button1.Update();
-
-  // Save click codes in function, as click codes are reset at next Update()
-  if(button1.clicks != 0) function = button1.clicks;
-
-  // These are single event button presses.
-  // Handle them and reset function back to 0
-  if ( function > 0 ) {
-    Serial.println("One-shot");
-    if ( function == 1 ) {
-      #ifdef IMMEDIATEON
-        digitalWrite(PIN_RELAY, HIGH);
-        relayNode.setProperty("relayState").send("ON");
-        Serial.println("Relay is on");
-      #endif
-      Serial.println("SINGLE click");
-      buttonNode.setProperty("event").setRetained(false).send("SINGLE");
-    }
-
-    if ( function == 2 ) {
-      buttonNode.setProperty("event").setRetained(false).send("DOUBLE");
-      Serial.println("DOUBLE click");
-    }
-
-    if ( function == 3 ) {
-      buttonNode.setProperty("event").setRetained(false).send("TRIPLE");
-      Serial.println("TRIPLE click");
-    }
-    // This has been a single event.
-    function = 0;
-  }
-
-  // These are repeat events, where the button is being held down.
-  // Handle them, but don't reset function back to 0 unless the button is released.
-  if ( function < 0 ) {
-    if ( millis() - previousMillis >= waitInterval ) {
-      previousMillis = millis();
-      if ( function == -1 ) {
-        buttonNode.setProperty("event").setRetained(false).send("SINGLEHELD");
-        Serial.println("SINGLE LONG click");
-      }
-
-      if ( function == -2 ) {
-        buttonNode.setProperty("event").setRetained(false).send("DOUBLEHELD");
-        Serial.println("DOUBLE LONG click");
-      }
-
-      if ( function == -3 ) {
-        buttonNode.setProperty("event").setRetained(false).send("TRIPLEHELD");
-        Serial.println("TRIPLE LONG click");
-      }
-    }
-
-    // Decide whether the button is being held or not
-    if ( button1.depressed == 1 ) {
-      // This will need rate limited
-      Serial.println("Held");
-    }
-    if ( button1.depressed == 0 ) {
-      Serial.println("Released");
-      function = 0;
-    }
-    // Rate limit...
-    delay(5);
-  }
-
-  }
+// void loopHandler() {
+//   //
+// }
 
 void onHomieEvent(const HomieEvent& event) {
   // Homie event handler
@@ -287,6 +208,9 @@ void onHomieEvent(const HomieEvent& event) {
 }
 
 void setup() {
+
+  Serial.begin(115200);
+
   EEPROM.begin(sizeof(EEpromData));
   EEPROM.get(0,EEpromData);
   pinMode(PIN_RELAY, OUTPUT);
@@ -310,7 +234,7 @@ void setup() {
   // This is a full reset, and will wipe the config
   Homie.setResetTrigger(PIN_BUTTON, LOW, 30000);
   Homie.setSetupFunction(setupHandler);
-  Homie.setLoopFunction(loopHandler);
+  //Homie.setLoopFunction(loopHandler);
   relayNode.advertise("relayState").settable(RelayHandler);
   //relayNode.advertise("relayTimer").settable(relayTimerHandler);
   relayNode.advertise("relayInitMode").settable(relayInitModeHandler);
@@ -336,6 +260,92 @@ void loop() {
       // The chances of being in OTA whilst disconnected from MQTT are slim.
       ESP.restart();
     };
+  }
+
+  // New section
+  // Check if keepalive is supported and expired
+  if (EEpromData.keepAliveTimeOut != 0 && (millis() - keepAliveReceived) > EEpromData.keepAliveTimeOut*1000 )
+  {
+    ESP.restart();
+  }
+  if (watchDogCounterStart!=0 && EEpromData.watchDogTimeOut!=0 && (millis() - watchDogCounterStart) > EEpromData.watchDogTimeOut * 1000 )
+  {
+    HomieRange emptyRange;
+    //relayTimerHandler(emptyRange, "10"); // Disable relay for 10 sec
+    watchDogCounterStart = millis();
+  }
+
+  // Update button state
+  button1.Update();
+
+  // Save click codes in function, as click codes are reset at next Update()
+  if(button1.clicks != 0) function = button1.clicks;
+
+  // These are single event button presses.
+  // Handle them and reset function back to 0
+  if ( function > 0 ) {
+    Serial.println("One-shot");
+    if ( function == 1 ) {
+      // If not connected, toggle the relay like a normal switch.
+      // Calls to relayNode don't work whilst offline.
+      if ( !Homie.isConnected() ) {
+        Serial.println("Offline toggle of relay");
+        digitalWrite(PIN_RELAY, !digitalRead(PIN_RELAY));
+      }
+      if ( Homie.isConnected() ) {
+        relayNode.setProperty("relayState").send("ON");
+        buttonNode.setProperty("event").setRetained(false).send("SINGLE");
+      }
+      Serial.println("SINGLE click");
+    }
+
+    if ( function == 2 ) {
+      if ( Homie.isConnected() ) { buttonNode.setProperty("event").setRetained(false).send("DOUBLE"); }
+      Serial.println("DOUBLE click");
+    }
+
+    if ( function == 3 ) {
+      if ( Homie.isConnected() ) { buttonNode.setProperty("event").setRetained(false).send("TRIPLE"); }
+      Serial.println("TRIPLE click");
+    }
+    // This has been a single event.
+    function = 0;
+  }
+
+  // These are repeat events, where the button is being held down.
+  // Handle them, but don't reset function back to 0 unless the button is released.
+  if ( function < 0 ) {
+    if ( millis() - previousMillis >= waitInterval ) {
+      previousMillis = millis();
+      if ( function == -1 ) {
+        if ( Homie.isConnected() ) { buttonNode.setProperty("event").setRetained(false).send("SINGLEHELD"); }
+        Serial.println("SINGLE LONG click");
+      }
+
+      if ( function == -2 ) {
+        if ( Homie.isConnected() ) { buttonNode.setProperty("event").setRetained(false).send("DOUBLEHELD"); }
+        Serial.println("DOUBLE LONG click");
+      }
+
+      if ( function == -3 ) {
+        if ( Homie.isConnected() ) { buttonNode.setProperty("event").setRetained(false).send("TRIPLEHELD"); }
+        Serial.println("TRIPLE LONG click");
+      }
+    }
+
+    // Decide whether the button is being held or not
+    // I much prefer the idea at https://www.home-assistant.io/cookbook/dim_and_brighten_lights/
+    // Where a pair of scripts are triggered by one message, and then loop until another message halts them.
+    if ( button1.depressed == 1 ) {
+      // This will need rate limited
+      Serial.println("Held");
+    }
+    if ( button1.depressed == 0 ) {
+      Serial.println("Released");
+      function = 0;
+    }
+    // Rate limit...
+    delay(5);
   }
 
   Homie.loop();
