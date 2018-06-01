@@ -201,6 +201,9 @@ void onHomieEvent(const HomieEvent& event) {
     case HomieEventType::WIFI_DISCONNECTED:
       // Do whatever you want when Wi-Fi is disconnected in normal mode
       break;
+    case HomieEventType::MQTT_READY:
+      // Do whatever you want when MQTT is connected in normal mode
+      break;
     case HomieEventType::MQTT_DISCONNECTED:
       // Do whatever you want when MQTT is disconnected in normal mode
       break;
