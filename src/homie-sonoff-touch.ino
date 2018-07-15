@@ -3,7 +3,7 @@
 #include <EEPROM.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.7"
+#define FW_VERSION "2.0.8"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 
@@ -217,9 +217,11 @@ void setup() {
   //digitalWrite(PIN_RELAY, LOW);
   if (EEpromData.initialState)
   {
-    digitalWrite(PIN_RELAY,1);
+    Serial.println("Startup: Relay On");
+    digitalWrite(PIN_RELAY,HIGH);
   } else {
-    digitalWrite(PIN_RELAY,0);
+    Serial.println("Startup: Relay Off");
+    digitalWrite(PIN_RELAY,LOW);
     EEpromData.initialState=0;
   }
 
@@ -296,6 +298,9 @@ void loop() {
         relayNode.setProperty("relayState").send("ON");
         buttonNode.setProperty("event").setRetained(false).send("SINGLE");
       }
+      // Read the new state, and use it to set the initial startup state
+      String PIN_STATE = String(digitalRead(PIN_RELAY));
+      relayNode.setProperty("relayInitMode").send(PIN_STATE);
       Serial.println("SINGLE click");
     }
 
