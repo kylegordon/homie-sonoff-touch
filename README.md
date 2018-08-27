@@ -31,6 +31,75 @@ Best used with PlatformIO. Simply git clone, pio run -t upload, watch the depend
 
 To reset the device back to Homie defaults, press the touchpad for over 10 seconds. This will wipe the configuration and drop it into config AP mode.
 
+## Features:
+
+This is heavily based on the code at https://github.com/enc-X/sonoff-homie
+
+* ON/OFF relay
+* Configurable default (on boot) relay state - (MQTT independent)
+* Local button on/off
+* keepalive feature - device will reboot if not receive keepalive message in given time
+* All Homie built in features (OTA, configuration, reporting, etc)
+
+## MQTT messages
+
+<table>
+<tr>
+  <th>Property</th>
+  <th>Message format</th>
+  <th>Direction</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/relay01/relayState</td>
+  <td><code>(ON|OFF)</code></td>
+  <td>Device → Controller</td>
+  <td>Current state of relay</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/relay01/relayState/set</td>
+  <td><code>(ON|OFF)</code></td>
+  <td>Controller → Device</td>
+  <td>Change relay state</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/relay01/relayInitMode</td>
+  <td><code>(0|1)</code></td>
+  <td>Device → Controller</td>
+  <td>Current boot mode <code>1</code> - relay ON, <code>0</code> - relay OFF</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/relay01/relayInitMode/set</td>
+  <td><code>(0|1)</code></td>
+  <td>Controller → Device</td>
+  <td>Set Boot mode <code>1</code> - relay ON, <code>0</code> - relay OFF</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/keepalive/keepAliveValue</td>
+  <td><code>\d+</code></td>
+  <td>Device → Controller</td>
+  <td>Report of keepalive value (seconds), 0 - keep alive feature is not active</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/keepalive/keepAliveValue/set</td>
+  <td><code>\d+</code></td>
+  <td>Controller → Device</td>
+  <td>Set keepalive time in seconds. Reboot if no ticks received in this time. 0 - keep alive feature is not active</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/keepalive/tick/set</td>
+  <td><code>.*</code></td>
+  <td>Controller → Device</td>
+  <td>Keepalive message from controller to gateway - if device will not receive during keepAliveValue time slot, it will reboot, keepalive is not active when keepAliveValue is equal 0</td>
+</tr>
+<tr>
+  <td>_HOMIE_PREFIX_/_node-id_/$online</td>
+  <td><code>(true|false)</code></td>
+  <td>Device → Controller</td>
+  <td><code>/true</code> when the device is online, <code>false</code> when the device is offline (through LWT)</td>
+</tr>
+</table>
+
 # Updating
 
 To use Homie built in OTA updater...
@@ -44,7 +113,7 @@ mosquitto_pub -h homeauto.vpn.glasgownet.com -t 'devices/60019485376d/$implement
 
 # Watchdog feature
 
-Very occasionally, the Homie stack will fail to reconnect after the resumption of wireless connectivity. The watchdog uses most of the same code from https://github.com/enc-X/sonoff-homie and simply needs to be 'set' and 'ticked' periodically. 
+Very occasionally, the Homie stack will fail to reconnect after the resumption of wireless connectivity. The watchdog uses most of the same code from https://github.com/enc-X/sonoff-homie and simply needs to be 'set' and 'ticked' periodically.
 
 To set it, publish to the ```devices/$device/keepalive/timeOut/set``` topic To provide a tick, publish to the ```device/keepalive/tick/set``` topic.
 To disable the watchdog feature, publish 0 to ```device/keepalive/timeOut/set``` and ```device/keepalive/tick/set```
