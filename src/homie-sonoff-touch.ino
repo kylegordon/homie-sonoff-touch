@@ -257,8 +257,7 @@ void loop() {
   } else {
     // If disconnected for over 5 minutes
     if ( millis() - connectedMillis >= 300000 ) {
-      Serial.println("Restarting in ten seconds");
-      delay(10000);
+      Serial.println("No connection - restarting");
       // The chances of being in OTA whilst disconnected from MQTT are slim.
       ESP.restart();
     };
@@ -268,6 +267,7 @@ void loop() {
   // Check if keepalive is supported and expired
   if (EEpromData.keepAliveTimeOut != 0 && (millis() - keepAliveReceived) > EEpromData.keepAliveTimeOut*1000 )
   {
+    Serial.println("No keepalive - restarting");
     ESP.restart();
   }
   if (watchDogCounterStart!=0 && EEpromData.watchDogTimeOut!=0 && (millis() - watchDogCounterStart) > EEpromData.watchDogTimeOut * 1000 )
