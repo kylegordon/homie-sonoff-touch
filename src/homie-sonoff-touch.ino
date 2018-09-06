@@ -3,7 +3,7 @@
 #include <EEPROM.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.8"
+#define FW_VERSION "2.0.9"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 
@@ -210,6 +210,8 @@ void onHomieEvent(const HomieEvent& event) {
 void setup() {
 
   Serial.begin(115200);
+  Serial.println("Startup: Delaying");
+  delay(5000);
 
   EEPROM.begin(sizeof(EEpromData));
   EEPROM.get(0,EEpromData);
@@ -247,6 +249,7 @@ void setup() {
 
   Homie.onEvent(onHomieEvent);
   Homie.setup();
+  Serial.println("Startup: Complete");
 }
 
 void loop() {
