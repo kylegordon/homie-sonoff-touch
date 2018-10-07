@@ -3,7 +3,8 @@
 #include <EEPROM.h>
 
 #define FW_NAME "homie-sonoff-touch"
-#define FW_VERSION "2.0.9"
+// Version number, with letter suffix for any library changes
+#define FW_VERSION "2.0.9c"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 
