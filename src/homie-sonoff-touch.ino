@@ -4,7 +4,7 @@
 
 #define FW_NAME "homie-sonoff-touch"
 // Version number, with letter suffix for any library changes
-#define FW_VERSION "2.0.9c"
+#define FW_VERSION "2.0.10a"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 
@@ -90,10 +90,10 @@ bool relayInitModeHandler(HomieRange range, String value) {
   int oldValue = EEpromData.initialState;
   if (value.toInt() == 1 or value=="ON")
   {
-    relayNode.setProperty("relayInitMode").send("1");
+    relayNode.setProperty("relayInitMode").setRetained(false).send("1");
     EEpromData.initialState=1;
   } else {
-    relayNode.setProperty("relayInitMode").send( "0");
+    relayNode.setProperty("relayInitMode").setRetained(false).send( "0");
     EEpromData.initialState=0;
   }
   if (oldValue!=EEpromData.initialState)
@@ -109,10 +109,10 @@ void setupHandler() {
   HomieRange emptyRange;
   if (EEpromData.initialState) {
     RelayHandler(emptyRange, "ON");
-    relayNode.setProperty("relayInitMode").send("1");
+    relayNode.setProperty("relayInitMode").setRetained(false).send("1");
   } else {
     RelayHandler(emptyRange, "OFF");
-    relayNode.setProperty("relayInitMode").send("0");
+    relayNode.setProperty("relayInitMode").setRetained(false).send("0");
   }
   String outMsg = String(EEpromData.keepAliveTimeOut);
   keepAliveNode.setProperty("timeOut").send(outMsg);
@@ -304,7 +304,9 @@ void loop() {
       }
       // Read the new state, and use it to set the initial startup state
       String PIN_STATE = String(digitalRead(PIN_RELAY));
-      relayNode.setProperty("relayInitMode").send(PIN_STATE);
+      // The retained initmode state really needs to be set by the HA system
+      // Determine if the local bulb is on or off, and set the desired InitMode of the switch
+      //relayNode.setProperty("relayInitMode").setRetained(false).send(PIN_STATE);
       Serial.println("SINGLE click");
     }
 
