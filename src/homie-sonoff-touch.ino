@@ -4,7 +4,7 @@
 
 #define FW_NAME "homie-sonoff-touch"
 // Version number, with letter suffix for any library changes
-#define FW_VERSION "2.0.10a"
+#define FW_VERSION "2.0.10b-no-arduinojson"
 
 // Disable this if you don't want the relay to turn on with any single tap event
 
