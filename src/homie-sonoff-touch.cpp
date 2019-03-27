@@ -105,6 +105,26 @@ bool relayInitModeHandler(HomieRange range, String value) {
   return true;
 }
 
+bool RelayHandler(const HomieRange& range, const String& value) {
+  // Here we handle incoming requests to set the state of the relay
+  // Set the RELAY_PIN to the appropriate level, and additionally set the
+  // state on the relayState topic.
+  if (value == "ON") {
+    digitalWrite(PIN_RELAY, HIGH);
+    if ( Homie.isConnected() ) { relayNode.setProperty("relayState").send("ON"); }
+    Serial.println("Relay is on");
+  } else if (value == "OFF") {
+    digitalWrite(PIN_RELAY, LOW);
+    if ( Homie.isConnected() ) { relayNode.setProperty("relayState").send("OFF"); }
+    Serial.println("Relay is off");
+  } else {
+    Serial.print("Unknown value: ");
+    Serial.println(value);
+    return false;
+  }
+  return true;
+}
+
 void setupHandler() {
   // Homie setup handler
   HomieRange emptyRange;
@@ -124,26 +144,6 @@ void setupHandler() {
   digitalWrite(PIN_LED, LOW);
   ledNode.setProperty("state").send("off");
   #endif
-}
-
-bool RelayHandler(const HomieRange& range, const String& value) {
-  // Here we handle incoming requests to set the state of the relay
-  // Set the RELAY_PIN to the appropriate level, and additionally set the
-  // state on the relayState topic.
-  if (value == "ON") {
-    digitalWrite(PIN_RELAY, HIGH);
-    if ( Homie.isConnected() ) { relayNode.setProperty("relayState").send("ON"); }
-    Serial.println("Relay is on");
-  } else if (value == "OFF") {
-    digitalWrite(PIN_RELAY, LOW);
-    if ( Homie.isConnected() ) { relayNode.setProperty("relayState").send("OFF"); }
-    Serial.println("Relay is off");
-  } else {
-    Serial.print("Unknown value: ");
-    Serial.println(value);
-    return false;
-  }
-  return true;
 }
 
 bool keepAliveTickHandler(HomieRange range, String value) {
