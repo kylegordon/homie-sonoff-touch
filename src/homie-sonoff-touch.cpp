@@ -1,6 +1,7 @@
 #include <ClickButton.h>
 #include <Homie.h>
 #include <EEPROM.h>
+#include <Arduino.h>
 
 #define FW_NAME "homie-sonoff-touch"
 // Version number, with letter suffix for any library changes
