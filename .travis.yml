@@ -13,7 +13,7 @@ cache:
         - "~/.platformio"
 
 env:
-    - PLATFORMIO_CI_SRC=src/homie-sonoff-touch.ino
+    - PLATFORMIO_CI_SRC=src/homie-sonoff-touch.cpp
 
 install:
     - pip install -U platformio
